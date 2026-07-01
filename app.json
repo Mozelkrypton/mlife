@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "name": "Mlife",
+    "slug": "mlife",
+    "version": "1.0.0",
+    "scheme": "mlife",
+    "orientation": "portrait",
+    "newArchEnabled": true,
+    "web": { "bundler": "metro" },
+    "plugins": ["expo-router", "expo-secure-store"]
+  }
+}
