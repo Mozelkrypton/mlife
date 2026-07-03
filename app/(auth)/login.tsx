@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { signIn } from '../../lib/auth';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
+import { colors, spacing, typography } from '../../constants/theme';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -28,26 +31,25 @@ export default function LoginScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Mlife</Text>
       <Text style={styles.subtitle}>Your life, chapter by chapter</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#888"
+
+      <Input
+        label="Email"
+        placeholder="Enter your email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#888"
+      <Input
+        label="Password"
+        placeholder="Enter your password"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Pressable style={styles.button} onPress={handleLogin} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Logging in…' : 'Log in'}</Text>
-      </Pressable>
+
+      <Button label="Log in" onPress={handleLogin} loading={loading} />
+
       <Link href="/(auth)/signup" style={styles.link}>
         <Text style={styles.linkText}>Don't have an account? Sign up</Text>
       </Link>
@@ -56,12 +58,30 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', justifyContent: 'center', padding: 24 },
-  title: { fontSize: 32, fontWeight: '600', textAlign: 'center', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 40 },
-  input: { backgroundColor: '#f4f4f2', borderRadius: 12, padding: 14, fontSize: 15, marginBottom: 12 },
-  button: { backgroundColor: '#0a0a0a', borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 8 },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
-  link: { marginTop: 20, alignSelf: 'center' },
-  linkText: { color: '#555', fontSize: 13 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  title: {
+    ...typography.appTitle,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+    color: colors.textPrimary,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xxl + spacing.md,
+  },
+  link: {
+    marginTop: spacing.xl,
+    alignSelf: 'center',
+  },
+  linkText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
 });

@@ -1,7 +1,10 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
 import { Link, router } from 'expo-router';
 import { signUp } from '../../lib/auth';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
+import { colors, spacing, typography } from '../../constants/theme';
 
 export default function SignupScreen() {
   const [email, setEmail] = useState('');
@@ -33,26 +36,25 @@ export default function SignupScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>Create account</Text>
       <Text style={styles.subtitle}>Start preserving your story</Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#888"
+
+      <Input
+        label="Email"
+        placeholder="Enter your email"
         value={email}
         onChangeText={setEmail}
         autoCapitalize="none"
         keyboardType="email-address"
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#888"
+      <Input
+        label="Password"
+        placeholder="Min. 6 characters"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
       />
-      <Pressable style={styles.button} onPress={handleSignup} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Creating account…' : 'Sign up'}</Text>
-      </Pressable>
+
+      <Button label="Sign up" onPress={handleSignup} loading={loading} />
+
       <Link href="/(auth)/login" style={styles.link}>
         <Text style={styles.linkText}>Already have an account? Log in</Text>
       </Link>
@@ -61,12 +63,30 @@ export default function SignupScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', justifyContent: 'center', padding: 24 },
-  title: { fontSize: 28, fontWeight: '600', textAlign: 'center', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: '#888', textAlign: 'center', marginBottom: 40 },
-  input: { backgroundColor: '#f4f4f2', borderRadius: 12, padding: 14, fontSize: 15, marginBottom: 12 },
-  button: { backgroundColor: '#0a0a0a', borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 8 },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
-  link: { marginTop: 20, alignSelf: 'center' },
-  linkText: { color: '#555', fontSize: 13 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    justifyContent: 'center',
+    padding: spacing.xl,
+  },
+  title: {
+    ...typography.appTitle,
+    textAlign: 'center',
+    marginBottom: spacing.xs,
+    color: colors.textPrimary,
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginBottom: spacing.xxl + spacing.md,
+  },
+  link: {
+    marginTop: spacing.xl,
+    alignSelf: 'center',
+  },
+  linkText: {
+    color: colors.textSecondary,
+    fontSize: 13,
+  },
 });
