@@ -1,8 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, Pressable, StyleSheet, Alert, ScrollView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCreateMemory } from '../../hooks/useMemories';
 import { useAuth } from '../../hooks/useAuth';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
+import { colors, spacing, typography } from '../../constants/theme';
 
 export default function NewMemoryScreen() {
   const { yearId } = useLocalSearchParams<{ yearId: string }>();
@@ -40,53 +43,58 @@ export default function NewMemoryScreen() {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.header}>
-        <Pressable onPress={() => router.back()}>
+        <Pressable onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backText}>← Back</Text>
         </Pressable>
         <Text style={styles.headerTitle}>New memory</Text>
       </View>
 
-      <Text style={styles.label}>Title</Text>
-      <TextInput
-        style={styles.input}
+      <Input
+        label="Title"
         placeholder="Give this memory a name…"
         value={title}
         onChangeText={setTitle}
       />
-
-      <Text style={styles.label}>Note</Text>
-      <TextInput
-        style={[styles.input, styles.textArea]}
+      <Input
+        label="Note"
         placeholder="What do you want to remember about this moment?"
         value={note}
         onChangeText={setNote}
         multiline
       />
-
-      <Text style={styles.label}>Location</Text>
-      <TextInput
-        style={styles.input}
+      <Input
+        label="Location"
         placeholder="Where were you?"
         value={location}
         onChangeText={setLocation}
       />
 
-      <Pressable style={styles.button} onPress={handleSave} disabled={loading}>
-        <Text style={styles.buttonText}>{loading ? 'Saving…' : 'Save memory'}</Text>
-      </Pressable>
+      <Button label="Save memory" onPress={handleSave} loading={loading} />
     </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  content: { padding: 24, paddingTop: 56 },
-  header: { marginBottom: 32 },
-  backText: { color: '#888', fontSize: 14, marginBottom: 12 },
-  headerTitle: { fontSize: 24, fontWeight: '600', color: '#0a0a0a' },
-  label: { fontSize: 12, fontWeight: '500', color: '#888', textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 6, marginTop: 16 },
-  input: { backgroundColor: '#f4f4f2', borderRadius: 12, padding: 14, fontSize: 15, color: '#0a0a0a' },
-  textArea: { height: 120, textAlignVertical: 'top' },
-  button: { backgroundColor: '#0a0a0a', borderRadius: 12, padding: 15, alignItems: 'center', marginTop: 32 },
-  buttonText: { color: '#fff', fontSize: 15, fontWeight: '500' },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    padding: spacing.xl,
+    paddingTop: spacing.headerTop,
+  },
+  header: {
+    marginBottom: spacing.xxl,
+  },
+  back: {
+    marginBottom: spacing.md,
+  },
+  backText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  headerTitle: {
+    ...typography.appTitle,
+    color: colors.textPrimary,
+  },
 });

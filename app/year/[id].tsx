@@ -1,8 +1,12 @@
-import { View, Text, FlatList, Pressable, StyleSheet, ActivityIndicator, TextInput, Alert } from 'react-native';
+import { View, Text, FlatList, Pressable, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useMemories } from '../../hooks/useMemories';
+import { MemoryThumb } from '../../components/MemoryThumb';
+import { Button } from '../../components/Button';
+import { Input } from '../../components/Input';
 import { supabase } from '../../lib/supabase';
+import { colors, spacing, typography, radius } from '../../constants/theme';
 import { Memory } from '../../types';
 
 export default function YearScreen() {
@@ -11,23 +15,29 @@ export default function YearScreen() {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [reflection, setReflection] = useState('');
+  const [saving, setSaving] = useState(false);
 
-  async function saveReflection() {
-    await supabase.from('years').update({ title, reflection }).eq('id', id);
-    setEditing(false);
-    Alert.alert('Saved!');
-  }
+  useEffect(() => {
+    async function loadYear() {
+      const { data } = await supabase.from('years').select('*').eq('id', id).single();
+      if (data) {
+        setTitle(data.title ?? '');
+        setReflection(data.reflection ?? '');
+      }
+    }
+    loadYear();
+  }, [id]);
 
-  function renderMemory({ item }: { item: Memory }) {
-    return (
-      <Pressable style={styles.memCard} onPress={() => router.push(`/memory/${item.id}`)}>
-        <View style={[styles.memThumb, { backgroundColor: '#c9bfb3' }]} />
-        <View style={styles.memBody}>
-          <Text style={styles.memTitle}>{item.title}</Text>
-          {item.location && <Text style={styles.memMeta}>{item.location}</Text>}
-        </View>
-      </Pressable>
-    );
+  async function handleSave() {
+    setSaving(true);
+    try {
+      await supabase.from('years').update({ title, reflection }).eq('id', id);
+      setEditing(false);
+    } catch {
+      Alert.alert('Error', 'Could not save changes.');
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -36,31 +46,32 @@ export default function YearScreen() {
         <Pressable onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backText}>← Back</Text>
         </Pressable>
+
         {editing ? (
           <View style={styles.editBlock}>
-            <TextInput
-              style={styles.input}
-              placeholder="Chapter title…"
-              placeholderTextColor="rgba(255,255,255,0.4)"
+            <Input
+              label="Chapter title"
+              placeholder="Name this year…"
               value={title}
               onChangeText={setTitle}
             />
-            <TextInput
-              style={[styles.input, styles.textArea]}
+            <Input
+              label="Reflection"
               placeholder="Write your reflection for this year…"
-              placeholderTextColor="rgba(255,255,255,0.4)"
               value={reflection}
               onChangeText={setReflection}
               multiline
             />
-            <Pressable style={styles.saveBtn} onPress={saveReflection}>
-              <Text style={styles.saveBtnText}>Save</Text>
-            </Pressable>
+            <Button label="Save" onPress={handleSave} loading={saving} variant="secondary" />
           </View>
         ) : (
           <Pressable onPress={() => setEditing(true)}>
-            <Text style={styles.headerTitle}>{title || 'Tap to add a title'}</Text>
-            <Text style={styles.headerReflection}>{reflection || 'Tap to write your reflection…'}</Text>
+            <Text style={styles.headerTitle}>
+              {title || 'Tap to add a title'}
+            </Text>
+            <Text style={styles.headerReflection}>
+              {reflection || 'Tap to write your reflection…'}
+            </Text>
           </Pressable>
         )}
       </View>
@@ -69,20 +80,27 @@ export default function YearScreen() {
         <View style={styles.sectionRow}>
           <Text style={styles.sectionLabel}>Memories</Text>
           <Pressable onPress={() => router.push(`/memory/new?yearId=${id}`)}>
-            <Text style={styles.addBtn}>+ Add</Text>
+            <Text style={styles.addLink}>+ Add memory</Text>
           </Pressable>
         </View>
 
         {isLoading ? (
-          <ActivityIndicator color="#0a0a0a" style={{ marginTop: 40 }} />
+          <ActivityIndicator color={colors.black} style={styles.loader} />
         ) : (
           <FlatList
             data={memories}
-            keyExtractor={item => item.id}
-            renderItem={renderMemory}
-            contentContainerStyle={{ gap: 10, paddingBottom: 40 }}
+            keyExtractor={(item: Memory) => item.id}
+            renderItem={({ item }) => (
+              <MemoryThumb
+                memory={item}
+                onPress={() => router.push(`/memory/${item.id}`)}
+              />
+            )}
+            contentContainerStyle={styles.list}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No memories yet — add your first one!</Text>
+              <Text style={styles.emptyText}>
+                No memories yet — add your first one!
+              </Text>
             }
           />
         )}
@@ -92,25 +110,66 @@ export default function YearScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
-  header: { backgroundColor: '#0a0a0a', padding: 24, paddingTop: 56, paddingBottom: 28 },
-  back: { marginBottom: 16 },
-  backText: { color: 'rgba(255,255,255,0.6)', fontSize: 14 },
-  headerTitle: { fontSize: 24, fontWeight: '500', color: '#fff', marginBottom: 8 },
-  headerReflection: { fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 20 },
-  editBlock: { gap: 10 },
-  input: { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: 10, padding: 12, color: '#fff', fontSize: 14 },
-  textArea: { height: 100, textAlignVertical: 'top' },
-  saveBtn: { backgroundColor: '#fff', borderRadius: 10, padding: 12, alignItems: 'center' },
-  saveBtnText: { color: '#0a0a0a', fontWeight: '500' },
-  body: { flex: 1, padding: 16 },
-  sectionRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 },
-  sectionLabel: { fontSize: 13, fontWeight: '500', color: '#888', textTransform: 'uppercase', letterSpacing: 0.5 },
-  addBtn: { fontSize: 14, fontWeight: '500', color: '#0a0a0a' },
-  memCard: { flexDirection: 'row', gap: 12, backgroundColor: '#f9f9f7', borderRadius: 12, overflow: 'hidden', borderWidth: 0.5, borderColor: '#e8e8e4' },
-  memThumb: { width: 72, height: 72 },
-  memBody: { flex: 1, justifyContent: 'center', paddingRight: 12 },
-  memTitle: { fontSize: 14, fontWeight: '500', color: '#0a0a0a' },
-  memMeta: { fontSize: 12, color: '#888', marginTop: 3 },
-  emptyText: { color: '#aaa', fontSize: 13, textAlign: 'center', marginTop: 40 },
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  header: {
+    backgroundColor: colors.headerBg,
+    padding: spacing.xl,
+    paddingTop: spacing.headerTop,
+    paddingBottom: spacing.xl,
+  },
+  back: {
+    marginBottom: spacing.lg,
+  },
+  backText: {
+    color: colors.textOnDarkMuted,
+    fontSize: 14,
+  },
+  headerTitle: {
+    ...typography.screenTitle,
+    color: colors.textOnDark,
+    marginBottom: spacing.sm,
+  },
+  headerReflection: {
+    ...typography.caption,
+    color: colors.textOnDarkMuted,
+    lineHeight: 20,
+  },
+  editBlock: {
+    gap: spacing.sm,
+  },
+  body: {
+    flex: 1,
+    padding: spacing.lg,
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  sectionLabel: {
+    ...typography.sectionLabel,
+    color: colors.textSecondary,
+  },
+  addLink: {
+    ...typography.body,
+    fontWeight: '500',
+    color: colors.textPrimary,
+  },
+  loader: {
+    marginTop: 40,
+  },
+  list: {
+    gap: spacing.sm,
+    paddingBottom: 40,
+  },
+  emptyText: {
+    ...typography.caption,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: 40,
+  },
 });
