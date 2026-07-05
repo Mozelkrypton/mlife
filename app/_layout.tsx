@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Stack, router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 
