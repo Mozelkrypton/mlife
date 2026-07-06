@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
-import { router } from 'expo-router';
-import { Stack } from 'expo-router/stack';
+import { router, ExperimentalStack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 
@@ -19,7 +18,7 @@ function RootLayoutNav() {
   }, [session, loading]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }} />
+    <ExperimentalStack screenOptions={{ headerShown: false }} />
   );
 }
 
