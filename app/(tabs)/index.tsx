@@ -1,9 +1,9 @@
-import { View, Text, FlatList, Pressable, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator } from 'react-native';
 import { router } from 'expo-router';
 import { useYears, useCreateYear } from '../../hooks/useYears';
 import { useAuth } from '../../hooks/useAuth';
 import { YearCard } from '../../components/YearCard';
-import { colors, spacing, typography, radius } from '../../constants/theme';
+import { timelineStyles as styles } from '../../styles/timeline';
 import { Year } from '../../types';
 
 export default function TimelineScreen() {
@@ -31,7 +31,7 @@ export default function TimelineScreen() {
   if (isLoading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color={colors.black} />
+        <ActivityIndicator size="large" />
       </View>
     );
   }
@@ -42,7 +42,6 @@ export default function TimelineScreen() {
         <Text style={styles.headerTitle}>Mlife</Text>
         <Text style={styles.headerSub}>Your life, chapter by chapter</Text>
       </View>
-
       <FlatList
         data={years}
         keyExtractor={(item: Year) => item.id}
@@ -53,76 +52,13 @@ export default function TimelineScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyTitle}>No years yet</Text>
-            <Text style={styles.emptySub}>
-              Tap the button below to start your first chapter
-            </Text>
+            <Text style={styles.emptySub}>Tap the button below to start your first chapter</Text>
           </View>
         }
       />
-
       <Pressable style={styles.fab} onPress={handleAddYear}>
         <Text style={styles.fabText}>+ Add {currentYear}</Text>
       </Pressable>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  header: {
-    backgroundColor: colors.headerBg,
-    padding: spacing.xl,
-    paddingTop: spacing.headerTop,
-  },
-  headerTitle: {
-    ...typography.appTitle,
-    color: colors.textOnDark,
-  },
-  headerSub: {
-    ...typography.caption,
-    color: colors.textOnDarkMuted,
-    marginTop: spacing.xs,
-  },
-  list: {
-    padding: spacing.lg,
-    gap: spacing.md,
-    paddingBottom: 100,
-  },
-  empty: {
-    alignItems: 'center',
-    paddingTop: 80,
-  },
-  emptyTitle: {
-    ...typography.screenTitle,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  emptySub: {
-    ...typography.caption,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    paddingHorizontal: spacing.xxl,
-  },
-  fab: {
-    position: 'absolute',
-    bottom: 80,
-    right: spacing.lg,
-    backgroundColor: colors.black,
-    borderRadius: radius.full,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.xl,
-  },
-  fabText: {
-    color: colors.textOnDark,
-    fontSize: 14,
-    fontWeight: '500',
-  },
-});

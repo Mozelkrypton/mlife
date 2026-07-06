@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { View, Text, Pressable, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, Pressable, Alert, ScrollView } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useCreateMemory } from '../../hooks/useMemories';
 import { useAuth } from '../../hooks/useAuth';
 import { Button } from '../../components/Button';
 import { Input } from '../../components/Input';
-import { colors, spacing, typography } from '../../constants/theme';
+import { newMemoryStyles as styles } from '../../styles/newMemory';
 
 export default function NewMemoryScreen() {
   const { yearId } = useLocalSearchParams<{ yearId: string }>();
@@ -48,53 +48,10 @@ export default function NewMemoryScreen() {
         </Pressable>
         <Text style={styles.headerTitle}>New memory</Text>
       </View>
-
-      <Input
-        label="Title"
-        placeholder="Give this memory a name…"
-        value={title}
-        onChangeText={setTitle}
-      />
-      <Input
-        label="Note"
-        placeholder="What do you want to remember about this moment?"
-        value={note}
-        onChangeText={setNote}
-        multiline
-      />
-      <Input
-        label="Location"
-        placeholder="Where were you?"
-        value={location}
-        onChangeText={setLocation}
-      />
-
+      <Input label="Title" placeholder="Give this memory a name…" value={title} onChangeText={setTitle} />
+      <Input label="Note" placeholder="What do you want to remember about this moment?" value={note} onChangeText={setNote} multiline />
+      <Input label="Location" placeholder="Where were you?" value={location} onChangeText={setLocation} />
       <Button label="Save memory" onPress={handleSave} loading={loading} />
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: spacing.xl,
-    paddingTop: spacing.headerTop,
-  },
-  header: {
-    marginBottom: spacing.xxl,
-  },
-  back: {
-    marginBottom: spacing.md,
-  },
-  backText: {
-    color: colors.textSecondary,
-    fontSize: 14,
-  },
-  headerTitle: {
-    ...typography.appTitle,
-    color: colors.textPrimary,
-  },
-});
