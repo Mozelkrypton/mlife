@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { router, Stack } from 'expo-router';
+import { router } from 'expo-router';
+import { Stack } from 'expo-router/stack';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useAuth } from '../hooks/useAuth';
 
@@ -18,13 +19,7 @@ function RootLayoutNav() {
   }, [session, loading]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(tabs)" />
-      <Stack.Screen name="year/[id]" />
-      <Stack.Screen name="memory/[id]" />
-      <Stack.Screen name="memory/new" />
-    </Stack>
+    <Stack screenOptions={{ headerShown: false }} />
   );
 }
 
