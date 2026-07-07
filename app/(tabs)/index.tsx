@@ -1,5 +1,6 @@
-import { View, Text, FlatList, Pressable, ActivityIndicator } from 'react-native';
+import { View, Text, FlatList, Pressable, ActivityIndicator, Modal, TextInput, Alert } from 'react-native';
 import { router } from 'expo-router';
+import { useState } from 'react';
 import { useYears, useCreateYear } from '../../hooks/useYears';
 import { useAuth } from '../../hooks/useAuth';
 import { YearCard } from '../../components/YearCard';
@@ -10,22 +11,38 @@ export default function TimelineScreen() {
   const { user } = useAuth();
   const { data: years, isLoading } = useYears();
   const createYear = useCreateYear();
-  const currentYear = new Date().getFullYear();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [yearInput, setYearInput] = useState(new Date().getFullYear().toString());
+  const [creating, setCreating] = useState(false);
 
   async function handleAddYear() {
-    const existing = years?.find(y => y.year === currentYear);
+    const yearNum = parseInt(yearInput);
+    if (isNaN(yearNum) || yearNum < 1900 || yearNum > 2100) {
+      Alert.alert('Invalid year', 'Please enter a valid year between 1900 and 2100.');
+      return;
+    }
+    const existing = years?.find(y => y.year === yearNum);
     if (existing) {
+      setModalVisible(false);
       router.push(`/year/${existing.id}`);
       return;
     }
-    const newYear = await createYear.mutateAsync({
-      user_id: user?.id,
-      year: currentYear,
-      title: null,
-      reflection: null,
-      cover_image_url: null,
-    });
-    router.push(`/year/${newYear.id}`);
+    setCreating(true);
+    try {
+      const newYear = await createYear.mutateAsync({
+        user_id: user?.id,
+        year: yearNum,
+        title: null,
+        reflection: null,
+        cover_image_url: null,
+      });
+      setModalVisible(false);
+      router.push(`/year/${newYear.id}`);
+    } catch (err: any) {
+      Alert.alert('Error', err.message ?? 'Could not create year.');
+    } finally {
+      setCreating(false);
+    }
   }
 
   if (isLoading) {
@@ -42,6 +59,7 @@ export default function TimelineScreen() {
         <Text style={styles.headerTitle}>Mlife</Text>
         <Text style={styles.headerSub}>Your life, chapter by chapter</Text>
       </View>
+
       <FlatList
         data={years}
         keyExtractor={(item: Year) => item.id}
@@ -56,9 +74,51 @@ export default function TimelineScreen() {
           </View>
         }
       />
-      <Pressable style={styles.fab} onPress={handleAddYear}>
-        <Text style={styles.fabText}>+ Add {currentYear}</Text>
+
+      <Pressable style={styles.fab} onPress={() => setModalVisible(true)}>
+        <Text style={styles.fabText}>+ Add year</Text>
       </Pressable>
+
+      <Modal
+        visible={modalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Add a year</Text>
+            <Text style={styles.modalSub}>Enter any year from your life</Text>
+            <TextInput
+              style={styles.modalInput}
+              value={yearInput}
+              onChangeText={setYearInput}
+              keyboardType="number-pad"
+              maxLength={4}
+              placeholder="e.g. 2019"
+              placeholderTextColor="#aaa"
+              autoFocus
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                style={styles.modalCancel}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </Pressable>
+              <Pressable
+                style={styles.modalConfirm}
+                onPress={handleAddYear}
+                disabled={creating}
+              >
+                <Text style={styles.modalConfirmText}>
+                  {creating ? 'Adding…' : 'Add'}
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
